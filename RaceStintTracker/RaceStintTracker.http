@@ -1,0 +1,6 @@
+@RaceStintTracker_HostAddress = http://localhost:5072
+
+GET {{RaceStintTracker_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
