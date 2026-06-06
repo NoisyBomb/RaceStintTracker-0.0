@@ -9,4 +9,6 @@ public class Race
     public TimeSpan LapTime { get; set; }
     public double FuelPerLap { get; set; }
     public TimeSpan PitTimeSpent { get; set; }
+    
+    public List<Stint> Stints { get; set; } = new();
 }

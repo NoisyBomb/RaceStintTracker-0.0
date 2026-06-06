@@ -8,4 +8,7 @@ public class Stint
     public int Laps { get; set; }
     public TimeSpan StintStartTime { get; set; }
     public TimeSpan StintEndTime { get; set; }
+    
+    public Race Race { get; set; } = null!;
+    public Driver Driver { get; set; } = null!;
 }

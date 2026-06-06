@@ -97,7 +97,40 @@ namespace RaceStintTracker.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DriverId");
+
+                    b.HasIndex("RaceId");
+
                     b.ToTable("Stints");
+                });
+
+            modelBuilder.Entity("RaceStintTracker.Models.Stint", b =>
+                {
+                    b.HasOne("RaceStintTracker.Models.Driver", "Driver")
+                        .WithMany("Stints")
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RaceStintTracker.Models.Race", "Race")
+                        .WithMany("Stints")
+                        .HasForeignKey("RaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Driver");
+
+                    b.Navigation("Race");
+                });
+
+            modelBuilder.Entity("RaceStintTracker.Models.Driver", b =>
+                {
+                    b.Navigation("Stints");
+                });
+
+            modelBuilder.Entity("RaceStintTracker.Models.Race", b =>
+                {
+                    b.Navigation("Stints");
                 });
 #pragma warning restore 612, 618
         }
