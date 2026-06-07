@@ -60,6 +60,9 @@ namespace RaceStintTracker.Migrations
                     b.Property<TimeSpan>("PitTimeSpent")
                         .HasColumnType("interval");
 
+                    b.Property<double>("TankCapacity")
+                        .HasColumnType("double precision");
+
                     b.Property<int>("TotalLaps")
                         .HasColumnType("integer");
 
