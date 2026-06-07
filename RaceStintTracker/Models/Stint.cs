@@ -9,6 +9,6 @@ public class Stint
     public TimeSpan StintStartTime { get; set; }
     public TimeSpan StintEndTime { get; set; }
     
-    public Race Race { get; set; } = null!;
-    public Driver Driver { get; set; } = null!;
+    public Race? Race { get; set; } = null!;
+    public Driver? Driver { get; set; } = null!;
 }
