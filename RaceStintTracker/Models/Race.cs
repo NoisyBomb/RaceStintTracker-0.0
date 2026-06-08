@@ -10,6 +10,7 @@ public class Race
     public double FuelPerLap { get; set; }
     public double TankCapacity { get; set; }
     public TimeSpan PitTimeSpent { get; set; }
+    public TimeSpan RaceDuration { get; set; }
     
-    public List<Stint> Stints { get; set; } = new();
+    public List<Stint>? Stints { get; set; } = new();
 }

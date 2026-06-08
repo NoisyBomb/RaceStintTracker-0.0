@@ -52,6 +52,8 @@ public class RacesController : ControllerBase
         existing.LapTime = race.LapTime;
         existing.PitTimeSpent = race.PitTimeSpent;
         existing.TotalLaps = race.TotalLaps;
+        existing.TankCapacity = race.TankCapacity;
+        existing.RaceDuration = race.RaceDuration;
         
         await _context.SaveChangesAsync();
         return Ok(existing);

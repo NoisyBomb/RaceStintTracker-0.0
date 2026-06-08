@@ -17,8 +17,7 @@ public class StintService
         var race = await _context.Races.FirstOrDefaultAsync(r => r.Id == raceId);
         if (race == null) throw new Exception("Race not found");
         int lapsPerStint = (int)(race.TankCapacity / race.FuelPerLap);
-        TimeSpan totalRaceTime = race.LapTime * race.TotalLaps;
-        TimeSpan raceEnd = raceStart + totalRaceTime;
+        TimeSpan raceEnd = raceStart + race.RaceDuration;
 
         var stints = new List<Stint>();
         TimeSpan currentTime = raceStart;
