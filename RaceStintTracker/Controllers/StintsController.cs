@@ -2,6 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using RaceStintTracker.Data;
 using RaceStintTracker.Models;
+using RaceStintTracker.Services;
+
+namespace RaceStintTracker.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -9,9 +12,11 @@ using RaceStintTracker.Models;
 public class StintsController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly StintService _stintService;
 
-    public StintsController(AppDbContext context)
+    public StintsController(AppDbContext context, StintService stintService)
     {
+        _stintService = stintService;
         _context = context;
     }
 
@@ -46,6 +51,18 @@ public class StintsController : ControllerBase
         _context.Stints.Add(stint);
         await _context.SaveChangesAsync();
         return Created($"/stints/{stint.Id}", stint);
+    }
+
+    [HttpPost("generate")]
+    public async Task<IActionResult> Generate([FromBody] GenerateStintsRequest request)
+    {
+        var stints = await _stintService.GenerateStints(
+            request.RaceId,
+            request.DriverIds,
+            request.RaceStart);
+        _context.Stints.AddRange(stints);
+        await _context.SaveChangesAsync();
+        return Ok(stints);
     }
 
     [HttpPut("{id}")]
