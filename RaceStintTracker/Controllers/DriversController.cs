@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RaceStintTracker.Models;
 using RaceStintTracker.Data;
+using RaceStintTracker.DTOs;
 
 namespace RaceStintTracker.Controllers;
 

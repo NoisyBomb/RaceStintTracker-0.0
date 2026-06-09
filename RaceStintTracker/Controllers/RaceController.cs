@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RaceStintTracker.Data;
 using RaceStintTracker.Models;
+using RaceStintTracker.DTOs;
 
 
 
