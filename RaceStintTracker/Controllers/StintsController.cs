@@ -52,11 +52,20 @@ public class StintsController : ControllerBase
     {
         var stint = await _context.Stints
             .Include(s => s.Driver)
-            .Include(s => s.Race)
             .FirstOrDefaultAsync(s => s.Id == id);
         if (stint == null) return NotFound();
-        return Ok(stint);
+        var result = new StintDto
+        {
+            Id = stint.Id,
+            StintNumber = 0, // без контекста всей гонки номер не считаем
+            DriverName = stint.Driver?.DriverName ?? "Unknown",
+            Laps = stint.Laps,
+            StintStartTime = stint.StintStartTime,
+            StintEndTime = stint.StintEndTime
+        };
+        return Ok(result);
     }
+
 
     [HttpPost]
     public async Task<IActionResult> Create(Stint stint)
@@ -79,7 +88,24 @@ public class StintsController : ControllerBase
             request.RaceStart);
         _context.Stints.AddRange(stints);
         await _context.SaveChangesAsync();
-        return Ok(stints);
+
+        // Загружаем пилотов для маппинга в DTO
+        var driverIds = stints.Select(s => s.DriverId).Distinct().ToList();
+        var drivers = await _context.Drivers
+            .Where(d => driverIds.Contains(d.Id))
+            .ToDictionaryAsync(d => d.Id, d => d.DriverName);
+
+        var result = stints.Select((s, index) => new StintDto
+        {
+            Id = s.Id,
+            StintNumber = index + 1,
+            DriverName = drivers.GetValueOrDefault(s.DriverId, "Unknown"),
+            Laps = s.Laps,
+            StintStartTime = s.StintStartTime,
+            StintEndTime = s.StintEndTime
+        }).ToList();
+
+        return Ok(result);
     }
 
     [HttpPut("{id}")]

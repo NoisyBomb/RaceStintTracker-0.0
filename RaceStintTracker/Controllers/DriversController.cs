@@ -20,8 +20,14 @@ public class DriversController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var drivers = await _context.Drivers.ToListAsync(); // _context.Drivers — это таблица Drivers в БД, ToListAsync() = SELECT * FROM Drivers
-        return Ok(drivers);
+        var drivers = await _context.Drivers.Include(d => d.Stints).ToListAsync();
+        var result = drivers.Select(d => new DriverDto
+        {
+            Id = d.Id,
+            DriverName = d.DriverName,
+            StintCount = d.Stints?.Count ?? 0
+        }).ToList();
+        return Ok(result);
     }
 
     [HttpPost]
@@ -36,8 +42,14 @@ public class DriversController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var driver = await _context.Drivers.Include(d => d.Stints).FirstOrDefaultAsync(d => d.Id == id);
-        if (driver == null) return  NotFound();
-        return Ok(driver);
+        if (driver == null) return NotFound();
+        var result = new DriverDto
+        {
+            Id = driver.Id,
+            DriverName = driver.DriverName,
+            StintCount = driver.Stints?.Count ?? 0
+        };
+        return Ok(result);
     }
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, Driver driver)

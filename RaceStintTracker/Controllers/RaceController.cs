@@ -23,6 +23,19 @@ public class RacesController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var races = await _context.Races.Include(r => r.Stints).ToListAsync();
+        var result = races.Select(r => new RaceDto
+        {
+            Id = r.Id,
+            Name = r.Name,
+            Track = r.Track,
+            TotalLaps = r.TotalLaps,
+            LapTime = r.LapTime,
+            FuelPerLap = r.FuelPerLap,
+            TankCapacity = r.TankCapacity,
+            PitTimeSpent = r.PitTimeSpent,
+            RaceDuration = r.RaceDuration,
+            StintCount = r.Stints?.Count ?? 0
+        }).ToList();
         return Ok(races);
     }
 
@@ -31,7 +44,20 @@ public class RacesController : ControllerBase
     {
         var race = await _context.Races.Include(r => r.Stints).FirstOrDefaultAsync(r => r.Id == id);
         if (race == null) return NotFound();
-        return Ok(race);
+        var result = new RaceDto
+        {
+            Id = race.Id,
+            Name = race.Name,
+            Track = race.Track,
+            TotalLaps = race.TotalLaps,
+            LapTime = race.LapTime,
+            FuelPerLap = race.FuelPerLap,
+            TankCapacity = race.TankCapacity,
+            PitTimeSpent = race.PitTimeSpent,
+            RaceDuration = race.RaceDuration,
+            StintCount = race.Stints?.Count ?? 0
+        };
+        return Ok(result);
     }
 
     [HttpPost]
