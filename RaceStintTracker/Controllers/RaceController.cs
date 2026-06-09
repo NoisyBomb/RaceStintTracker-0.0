@@ -36,7 +36,7 @@ public class RacesController : ControllerBase
             RaceDuration = r.RaceDuration,
             StintCount = r.Stints?.Count ?? 0
         }).ToList();
-        return Ok(races);
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
