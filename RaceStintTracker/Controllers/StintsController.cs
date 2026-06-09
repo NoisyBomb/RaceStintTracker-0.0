@@ -83,14 +83,35 @@ public class StintsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Stint stint)
+    public async Task<IActionResult> UpdateStint(int id, UpdateStintRequest request)
     {
-        var existing = await _context.Stints.FirstOrDefaultAsync(r => r.Id == id);
+        var existing = await _context.Stints
+            .Include(s => s.Race)
+            .FirstOrDefaultAsync(s => s.Id == id);
+    
         if (existing == null) return NotFound();
-        existing.DriverId = stint.DriverId;
-        existing.Laps = stint.Laps;
-        existing.StintStartTime = stint.StintStartTime;
-        existing.StintEndTime = stint.StintEndTime;
+
+        // Смена пилота
+        if (request.DriverId.HasValue)
+        {
+            var driver = await _context.Drivers.FirstOrDefaultAsync(d => d.Id == request.DriverId.Value);
+            if (driver == null) return BadRequest("Driver not found");
+            existing.DriverId = request.DriverId.Value;
+        }
+
+        // Досрочный пит-стоп — уменьшение кругов
+        if (request.Laps.HasValue)
+        {
+            if (request.Laps.Value >= existing.Laps)
+                return BadRequest("Laps can only be reduced (early pit stop)");
+            if (request.Laps.Value <= 0)
+                return BadRequest("Laps must be greater than 0");
+        
+            existing.Laps = request.Laps.Value;
+            await _context.SaveChangesAsync();
+            await _stintService.RecalculateFromStint(id);
+            return Ok(existing);
+        }
         await _context.SaveChangesAsync();
         return Ok(existing);
     }
