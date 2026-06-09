@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RaceStintTracker.Data;
 using RaceStintTracker.Models;
 using RaceStintTracker.Services;
+using RaceStintTracker.DTOs;
 
 namespace RaceStintTracker.Controllers;
 
@@ -26,8 +27,24 @@ public class StintsController : ControllerBase
         var stints = await _context.Stints
             .Include(s => s.Driver)
             .Include(s => s.Race)
+            .OrderBy(s => s.RaceId)
+            .ThenBy(s => s.StintStartTime)
             .ToListAsync();
-        return Ok(stints);
+
+        // Нумерация стинтов внутри каждой гонки отдельно
+        var grouped = stints
+            .GroupBy(s => s.RaceId)
+            .SelectMany(g => g.Select((s, index) => new StintDto
+            {
+                Id = s.Id,
+                StintNumber = index + 1,
+                DriverName = s.Driver?.DriverName ?? "Unknown",
+                Laps = s.Laps,
+                StintStartTime = s.StintStartTime,
+                StintEndTime = s.StintEndTime
+            }))
+            .ToList();
+        return Ok(grouped);
     }
 
     [HttpGet("{id}")]
