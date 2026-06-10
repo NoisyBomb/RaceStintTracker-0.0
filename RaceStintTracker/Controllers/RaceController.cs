@@ -63,6 +63,20 @@ public class RacesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(Race race)
     {
+        if (string.IsNullOrEmpty(race.Name))
+            return BadRequest("Name is required");
+        if (string.IsNullOrEmpty(race.Track))
+            return BadRequest("Track is required");
+        if (race.FuelPerLap <= 0)
+            return BadRequest("FuelPerLap must be greater than zero");
+        if (race.TankCapacity <= 0)
+            return BadRequest("TankCapacity must be greater than zero");
+        if(race.LapTime <= TimeSpan.Zero)
+            return BadRequest("LapTime must be greater than zero");
+        if (race.PitTimeSpent <= TimeSpan.Zero)
+            return BadRequest("PitTimeSpent must be greater than zero");
+        if (race.RaceDuration <= TimeSpan.Zero)
+            return BadRequest("RaceDuration must be greater than zero");
         _context.Races.Add(race);
         await _context.SaveChangesAsync();
         return Created("$/races{race.Id}", race);

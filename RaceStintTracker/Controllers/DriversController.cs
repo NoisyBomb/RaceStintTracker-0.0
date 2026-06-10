@@ -33,6 +33,8 @@ public class DriversController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(Driver driver)
     {
+        if (string.IsNullOrEmpty(driver.DriverName))
+            return BadRequest("Driver name is required");
         _context.Drivers.Add(driver);
         await _context.SaveChangesAsync();
         return Created($"/drivers/{driver.Id}", driver);

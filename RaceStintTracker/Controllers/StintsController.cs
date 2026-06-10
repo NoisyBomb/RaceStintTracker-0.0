@@ -82,6 +82,17 @@ public class StintsController : ControllerBase
     [HttpPost("generate")]
     public async Task<IActionResult> Generate([FromBody] GenerateStintsRequest request)
     {
+        if (request.DriverIds == null || request.DriverIds.Count == 0)
+            return BadRequest("DriverIds must be set");
+        if (request.DriverIds.Count < 2)
+            return BadRequest("At least 2 drivers are required");
+        if (request.RaceStart <= TimeSpan.Zero)
+            return BadRequest("RaceStart is required");
+        var existingStints = await _context.Stints
+            .Where(s => s.RaceId == request.RaceId)
+            .AnyAsync();
+        if (existingStints) return BadRequest("Stints already generated for this race");
+        
         var stints = await _stintService.GenerateStints(
             request.RaceId,
             request.DriverIds,
