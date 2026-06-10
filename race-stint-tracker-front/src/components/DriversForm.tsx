@@ -19,19 +19,17 @@ export default function DriversForm() {
         setDrivers(res.data)
     }
 
-    useEffect(() => {
-        loadDrivers()
-    }, [])
+    useEffect(() => { loadDrivers() }, [])
 
     const addDriver = async () => {
-        if (!name.trim()) return
+        if (!name.trim()) return setError('Введите имя пилота')
         try {
             await axios.post(`${API}/drivers`, { driverName: name })
             setName('')
             setError('')
             loadDrivers()
         } catch (e: any) {
-            setError(e.response?.data || 'Ошибка')
+            setError(e.response?.data || 'Ошибка добавления')
         }
     }
 
@@ -43,38 +41,61 @@ export default function DriversForm() {
     return (
         <div className="form-container">
             <h2>Пилоты</h2>
+
             <div className="input-row">
-                <input
-                    placeholder="Имя пилота"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && addDriver()}
-                />
-                <button onClick={addDriver}>Добавить</button>
+                <div className="input-wrapper" style={{ flex: 1 }}>
+                    <span className="input-label">Имя пилота</span>
+                    <input
+                        placeholder="Например, Max Verstappen"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && addDriver()}
+                    />
+                </div>
+                <button className="btn btn-primary" onClick={addDriver}>
+                    + Добавить
+                </button>
             </div>
-            {error && <div className="error">{error}</div>}
-            <table className="data-table">
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Имя</th>
-                    <th>Стинтов</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                {drivers.map((d, i) => (
-                    <tr key={d.id}>
-                        <td>{i + 1}</td>
-                        <td>{d.driverName}</td>
-                        <td>{d.stintCount}</td>
-                        <td>
-                            <button className="btn-delete" onClick={() => deleteDriver(d.id)}>✕</button>
-                        </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+
+            {error && <div className="error">⚠️ {error}</div>}
+
+            <div className="table-wrapper">
+                {drivers.length === 0 ? (
+                    <div className="empty-state">
+                        <div className="empty-state-title">Нет пилотов</div>
+                        <div className="empty-state-desc">Добавьте первого пилота через форму выше</div>
+                    </div>
+                ) : (
+                    <table className="data-table">
+                        <thead>
+                        <tr>
+                            <th style={{ width: 60 }}>#</th>
+                            <th>Имя</th>
+                            <th style={{ width: 120 }}>Стинтов</th>
+                            <th style={{ width: 60 }}></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {drivers.map((d, i) => (
+                            <tr key={d.id}>
+                                <td>{i + 1}</td>
+                                <td style={{ fontWeight: 600 }}>{d.driverName}</td>
+                                <td style={{ color: 'var(--text-tertiary)' }}>{d.stintCount}</td>
+                                <td>
+                                    <button
+                                        className="btn btn-icon btn-delete"
+                                        onClick={() => deleteDriver(d.id)}
+                                        title="Удалить пилота"
+                                    >
+                                        ✕
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
         </div>
     )
 }
