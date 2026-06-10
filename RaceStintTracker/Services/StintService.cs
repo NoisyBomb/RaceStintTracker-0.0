@@ -94,29 +94,61 @@ public class StintService
             stint.StintEndTime = stintEnd;
             currentTime = stintEnd;
         }
+        // Если после пересчёта до финиша осталось время
         var lastStint = nextStints.LastOrDefault() ?? changedStint;
         TimeSpan timeAfterLast = raceEnd - lastStint.StintEndTime;
-        int minLaps = (int)(timeAfterLast / race.LapTime);
-        if (minLaps > 0)
+        int extraLaps = (int)(timeAfterLast / race.LapTime);
+        if (extraLaps > 0)
         {
-            // Берём следующего пилота по очереди
-            var allStints = await _context.Stints
-                .Where(s => s.RaceId == changedStint.RaceId)
-                .OrderBy(s => s.StintStartTime)
-                .ToListAsync();
-            var lastDriverId = lastStint.DriverId;
-            var driverIds = allStints.Select(s => s.DriverId).Distinct().ToList();
-            int lastDriverIndex = driverIds.IndexOf(lastDriverId);
-            int nextDriverId = driverIds[(lastDriverIndex + 1) % driverIds.Count];
-            var newStint = new Stint
+            int maxLaps = (int)(race.TankCapacity / race.FuelPerLap);
+            if (lastStint.Laps < maxLaps)
             {
-                RaceId = changedStint.RaceId,
-                DriverId = nextDriverId,
-                Laps = minLaps,
-                StintStartTime = lastStint.StintEndTime,
-                StintEndTime = raceEnd
-            };
-            _context.Stints.Add(newStint);
+                int canAdd = maxLaps - lastStint.Laps;
+                int toAdd = Math.Min(extraLaps, canAdd);
+                lastStint.Laps += toAdd;
+                lastStint.StintEndTime = lastStint.StintStartTime
+                                         + race.LapTime * lastStint.Laps
+                                         + race.PitTimeSpent;
+                TimeSpan stillRemaining = raceEnd - lastStint.StintEndTime;
+                int stillLaps = (int)(stillRemaining / race.LapTime);
+                if (stillLaps > 0)
+                {
+                    var allStints = await _context.Stints
+                        .Where(s => s.RaceId == changedStint.RaceId)
+                        .OrderBy(s => s.StintStartTime)
+                        .ToListAsync();
+                    var driverIds = allStints.Select(s => s.DriverId).Distinct().ToList();
+                    int lastDriverIndex = driverIds.IndexOf(lastStint.DriverId);
+                    int nextDriverId = driverIds[(lastDriverIndex + 1) % driverIds.Count];
+                    _context.Stints.Add(new Stint
+                    {
+                        RaceId = changedStint.RaceId,
+                        DriverId = nextDriverId,
+                        Laps = stillLaps,
+                        StintStartTime = lastStint.StintEndTime,
+                        StintEndTime = raceEnd
+                    });
+                }
+            }
+            else
+            {
+                // Последний стинт полный — добавляем новый
+                var allStints = await _context.Stints
+                    .Where(s => s.RaceId == changedStint.RaceId)
+                    .OrderBy(s => s.StintStartTime)
+                    .ToListAsync();
+                var driverIds = allStints.Select(s => s.DriverId).Distinct().ToList();
+                int lastDriverIndex = driverIds.IndexOf(lastStint.DriverId);
+                int nextDriverId = driverIds[(lastDriverIndex + 1) % driverIds.Count];
+                _context.Stints.Add(new Stint
+                {
+                    RaceId = changedStint.RaceId,
+                    DriverId = nextDriverId,
+                    Laps = extraLaps,
+                    StintStartTime = lastStint.StintEndTime,
+                    StintEndTime = raceEnd
+                });
+            }
         }
         await _context.SaveChangesAsync();
     }

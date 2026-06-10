@@ -139,7 +139,7 @@ public class StintsController : ControllerBase
         // Досрочный пит-стоп — уменьшение кругов
         if (request.Laps.HasValue)
         {
-            if (request.Laps.Value >= existing.Laps)
+            if (request.Laps.Value > existing.Laps)
                 return BadRequest("Laps can only be reduced (early pit stop)");
             if (request.Laps.Value <= 0)
                 return BadRequest("Laps must be greater than 0");
