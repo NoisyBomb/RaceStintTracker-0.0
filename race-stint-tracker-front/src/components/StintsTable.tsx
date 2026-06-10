@@ -91,7 +91,11 @@ export default function StintsTable() {
             setError('')
             loadStints()
         } catch (e: any) {
-            setError(e.response?.data || 'Ошибка редактирования')
+            const data = e.response?.data
+            if (typeof data === 'string') setError(data)
+            else if (data?.errors) setError(Object.values(data.errors).flat().join(', '))
+            else if (data?.title) setError(data.title)
+            else setError('Ошибка создания')
         }
     }
 
@@ -106,57 +110,35 @@ export default function StintsTable() {
             <h2>Стинты</h2>
 
             <div className="generate-panel">
-                {/* Гонка */}
-                <div className="control-group">
-                    <span className="control-label">Гонка</span>
-                    <select onChange={e => setSelectedRace(Number(e.target.value))} defaultValue="">
-                        <option value="" disabled>Выберите гонку</option>
-                        {races.map(r => (
-                            <option key={r.id} value={r.id}>{r.name} — {r.track}</option>
-                        ))}
-                    </select>
+                <select onChange={e => setSelectedRace(Number(e.target.value))} defaultValue="">
+                    <option value="" disabled>Выберите гонку</option>
+                    {races.map(r => (
+                        <option key={r.id} value={r.id}>{r.name} — {r.track}</option>
+                    ))}
+                </select>
+
+                <div className="driver-checkboxes">
+                    {drivers.map(d => (
+                        <label
+                            key={d.id}
+                            className={`driver-checkbox ${selectedDrivers.includes(d.id) ? 'selected' : ''}`}
+                        >
+                            <input
+                                type="checkbox"
+                                checked={selectedDrivers.includes(d.id)}
+                                onChange={() => toggleDriver(d.id)}
+                            />
+                            {d.driverName}
+                        </label>
+                    ))}
                 </div>
 
-                {/* Пилоты */}
-                <div className="control-group">
-                    <span className="control-label">Пилоты ({selectedDrivers.length})</span>
-                    <div className="driver-checkboxes">
-                        {drivers.length === 0 ? (
-                            <span style={{ color: 'var(--text-tertiary)', fontSize: 13, padding: '8px 0' }}>
-                Добавьте пилотов
-              </span>
-                        ) : drivers.map(d => (
-                            <label
-                                key={d.id}
-                                className={`driver-checkbox ${selectedDrivers.includes(d.id) ? 'selected' : ''}`}
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={selectedDrivers.includes(d.id)}
-                                    onChange={() => toggleDriver(d.id)}
-                                />
-                                {d.driverName}
-                            </label>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Старт гонки */}
-                <div className="control-group">
-                    <span className="control-label">Старт гонки</span>
-                    <input
-                        placeholder="10:40:00"
-                        value={raceStart}
-                        onChange={e => setRaceStart(e.target.value)}
-                    />
-                </div>
-
-                {/* Кнопка */}
-                <div className="control-group">
-                    <button className="btn-primary" onClick={generate}>
-                        Сгенерировать план
-                    </button>
-                </div>
+                <input
+                    placeholder="Старт гонки (10:40:00)"
+                    value={raceStart}
+                    onChange={e => setRaceStart(e.target.value)}
+                />
+                <button className="btn-primary" onClick={generate}>Сгенерировать план</button>
             </div>
 
             {error && <div className="error">{error}</div>}
@@ -209,7 +191,7 @@ export default function StintsTable() {
                                 {editId === s.id ? (
                                     <>
                                         <button className="btn-save" onClick={() => saveEdit(s.id)}>✓</button>
-                                        <button className="btn-delete" onClick={() => setEditId(null)}></button>
+                                        <button className="btn-delete" onClick={() => setEditId(null)}>✕</button>
                                     </>
                                 ) : (
                                     <button className="btn-edit" onClick={() => startEdit(s)}>✎</button>

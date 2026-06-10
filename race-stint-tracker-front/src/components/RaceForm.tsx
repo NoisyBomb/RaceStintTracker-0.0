@@ -48,7 +48,11 @@ export default function RaceForm() {
             setForm({ ...form, name: '', track: '' })
             loadRaces()
         } catch (e: any) {
-            setError(e.response?.data || 'Ошибка создания')
+            const data = e.response?.data
+            if (typeof data === 'string') setError(data)
+            else if (data?.errors) setError(Object.values(data.errors).flat().join(', '))
+            else if (data?.title) setError(data.title)
+            else setError('Ошибка создания')
         }
     }
 
@@ -93,7 +97,7 @@ export default function RaceForm() {
                         <option value="06:00:00">6 часов</option>
                         <option value="08:00:00">8 часов</option>
                         <option value="12:00:00">12 часов</option>
-                        <option value="24:00:00">24 часа</option>
+                        <option value="1.00:00:00">24 часа</option>
                     </select>
                 </div>
             </div>

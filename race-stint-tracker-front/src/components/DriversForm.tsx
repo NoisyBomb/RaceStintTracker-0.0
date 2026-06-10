@@ -29,7 +29,11 @@ export default function DriversForm() {
             setError('')
             loadDrivers()
         } catch (e: any) {
-            setError(e.response?.data || 'Ошибка добавления')
+            const data = e.response?.data
+            if (typeof data === 'string') setError(data)
+            else if (data?.errors) setError(Object.values(data.errors).flat().join(', '))
+            else if (data?.title) setError(data.title)
+            else setError('Ошибка создания')
         }
     }
 
