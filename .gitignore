@@ -6,3 +6,4 @@ riderModule.iml
 **/appsettings.Development.json
 **/appsettings.Production.json
 .env
+**/.env.development

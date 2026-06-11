@@ -1,5 +1,4 @@
 ﻿// components/icons.tsx
-import React from 'react'
 
 type IconProps = { size?: number; className?: string }
 

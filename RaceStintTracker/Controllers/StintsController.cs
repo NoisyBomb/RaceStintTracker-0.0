@@ -8,7 +8,7 @@ using RaceStintTracker.DTOs;
 namespace RaceStintTracker.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 
 public class StintsController : ControllerBase
 {

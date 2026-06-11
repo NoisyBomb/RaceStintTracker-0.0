@@ -1,8 +1,9 @@
 ﻿import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-const API = 'http://localhost:5072'
-
+const API = import.meta.env.VITE_API_URL ?? '/api'
+//const API = 'http://localhost:5072/api'
+console.log('API URL:', import.meta.env.VITE_API_URL)
 interface Stint {
     id: number
     stintNumber: number
@@ -53,7 +54,10 @@ export default function StintsTable() {
     }
 
     useEffect(() => {
-        axios.get(`${API}/races`).then(r => setRaces(r.data))
+        axios.get(`${API}/races`).then(r => {
+            console.log('races:', r.data)
+            setRaces(Array.isArray(r.data) ? r.data : [])
+        })
         axios.get(`${API}/drivers`).then(r => setDrivers(r.data))
     }, [])
 
