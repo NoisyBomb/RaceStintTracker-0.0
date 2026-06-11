@@ -22,10 +22,10 @@ export default function RaceForm() {
         name: '',
         track: '',
         totalLaps: 0,
-        lapTime: '00:08:00',
+        lapTime: '00:02:00',
         fuelPerLap: 3.5,
         tankCapacity: 100,
-        pitTimeSpent: '00:05:00',
+        pitTimeSpent: '00:01:20',
         raceDuration: '06:00:00'
     })
 
@@ -76,7 +76,7 @@ export default function RaceForm() {
                 </div>
                 <div className="input-wrapper">
                     <span className="input-label">Время круга</span>
-                    <input name="lapTime" placeholder="00:08:00" value={form.lapTime} onChange={handleChange} />
+                    <input name="lapTime" placeholder="00:02:00" value={form.lapTime} onChange={handleChange} />
                 </div>
                 <div className="input-wrapper">
                     <span className="input-label">Расход / круг</span>
@@ -88,7 +88,7 @@ export default function RaceForm() {
                 </div>
                 <div className="input-wrapper">
                     <span className="input-label">Время пит-стопа</span>
-                    <input name="pitTimeSpent" placeholder="00:05:00" value={form.pitTimeSpent} onChange={handleChange} />
+                    <input name="pitTimeSpent" placeholder="00:01:20" value={form.pitTimeSpent} onChange={handleChange} />
                 </div>
                 <div className="input-wrapper">
                     <span className="input-label">Длительность</span>
