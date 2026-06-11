@@ -46,16 +46,16 @@ export default function StintsTable() {
         driverColorMap[name] = DRIVER_COLORS[i % DRIVER_COLORS.length]
     })
 
+    const loadStints = async (raceId?: number) => {
+        if (!raceId) return
+        const res = await axios.get(`${API}/stints/by-race/${raceId}`)
+        setStints(res.data)
+    }
+
     useEffect(() => {
         axios.get(`${API}/races`).then(r => setRaces(r.data))
         axios.get(`${API}/drivers`).then(r => setDrivers(r.data))
-        axios.get(`${API}/stints`).then(r => setStints(r.data))
     }, [])
-
-    const loadStints = async () => {
-        const res = await axios.get(`${API}/stints`)
-        setStints(res.data)
-    }
 
     const toggleDriver = (id: number) => {
         setSelectedDrivers(prev =>
@@ -73,9 +73,13 @@ export default function StintsTable() {
                 raceStart
             })
             setError('')
-            loadStints()
+            loadStints(selectedRace)
         } catch (e: any) {
-            setError(e.response?.data || 'Ошибка генерации')
+            const data = e.response?.data
+            if (typeof data === 'string') setError(data)
+            else if (data?.errors) setError(Object.values(data.errors).flat().join(', '))
+            else if (data?.title) setError(data.title)
+            else setError('Ошибка генерации')
         }
     }
 
@@ -89,13 +93,13 @@ export default function StintsTable() {
             setEditDriverId(null)
             setEditLaps(null)
             setError('')
-            loadStints()
+            loadStints(selectedRace ?? undefined)
         } catch (e: any) {
             const data = e.response?.data
             if (typeof data === 'string') setError(data)
             else if (data?.errors) setError(Object.values(data.errors).flat().join(', '))
             else if (data?.title) setError(data.title)
-            else setError('Ошибка создания')
+            else setError('Ошибка редактирования')
         }
     }
 
@@ -110,7 +114,11 @@ export default function StintsTable() {
             <h2>Стинты</h2>
 
             <div className="generate-panel">
-                <select onChange={e => setSelectedRace(Number(e.target.value))} defaultValue="">
+                <select onChange={e => {
+                    const id = Number(e.target.value)
+                    setSelectedRace(id)
+                    loadStints(id)
+                }} defaultValue="">
                     <option value="" disabled>Выберите гонку</option>
                     {races.map(r => (
                         <option key={r.id} value={r.id}>{r.name} — {r.track}</option>
@@ -171,8 +179,8 @@ export default function StintsTable() {
                                     </select>
                                 ) : (
                                     <span style={{ color: driverColorMap[s.driverName], fontWeight: 600 }}>
-                      {s.driverName}
-                    </span>
+                                        {s.driverName}
+                                    </span>
                                 )}
                             </td>
                             <td>

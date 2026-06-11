@@ -65,7 +65,28 @@ public class StintsController : ControllerBase
         };
         return Ok(result);
     }
+    
+    [HttpGet("by-race/{raceId}")]
+    public async Task<IActionResult> GetByRace(int raceId)
+    {
+        var stints = await _context.Stints
+            .Include(s => s.Driver)
+            .Where(s => s.RaceId == raceId)
+            .OrderBy(s => s.StintStartTime)
+            .ToListAsync();
 
+        var result = stints.Select((s, index) => new StintDto
+        {
+            Id = s.Id,
+            StintNumber = index + 1,
+            DriverName = s.Driver?.DriverName ?? "Unknown",
+            Laps = s.Laps,
+            StintStartTime = s.StintStartTime,
+            StintEndTime = s.StintEndTime
+        }).ToList();
+
+        return Ok(result);
+    }
 
     [HttpPost]
     public async Task<IActionResult> Create(Stint stint)
